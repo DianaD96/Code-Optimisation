@@ -1,6 +1,6 @@
 # Code Optimisation
 
-This program uses Java and BCEL (Byte Code Engineering Library) tot implement the constant folding peephole optimisation as much as possible.
+This program uses Java and BCEL (Byte Code Engineering Library) to implement the constant folding peephole optimisation as much as possible.
 This code consits of:
 
 ## Simple Folding
