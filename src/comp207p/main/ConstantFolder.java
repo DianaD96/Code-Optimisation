@@ -53,6 +53,16 @@ public class ConstantFolder
 			System.out.println("FROM SIPUSH = " + ((SIPUSH)(handle.getInstruction())).getValue());
 			System.out.println();
 		}
+		if (handle.getInstruction() instanceof LDC)
+		{
+			System.out.println("FROM LDC = " + ((LDC)(handle.getInstruction())).getValue(cpgen));
+			System.out.println();
+		}
+		if (handle.getInstruction() instanceof LDC2_W)
+		{
+			System.out.println("FROM LDC2_W = " + ((LDC2_W)(handle.getInstruction())).getValue(cpgen));
+			System.out.println();
+		}
 		return 0;
 	}
 	 
@@ -78,6 +88,10 @@ public class ConstantFolder
 
 				//System.out.println("instHandle= " + handle.getInstruction());
 	            
+	        	
+	        	if ((handle.getInstruction() instanceof IF_ICMPLE)){
+	        		return;
+	        	}
 				getPrevInt(handle, instList, cpgen);
 	            	
                 
@@ -94,8 +108,9 @@ public class ConstantFolder
 			        Method newMethod = methodGen.getMethod();
 			        // replace the method in the original class
 			        cgen.replaceMethod(method, newMethod);
-		        }
-	        }
+		    }
+	}
+	 
 	public void optimize()
 	{
 		ClassGen cgen = new ClassGen(original);
@@ -109,6 +124,7 @@ public class ConstantFolder
 	        for (Method m : methods) {
 	           // System.out.println("Method: " + m.getName());
 	            optimizeMethod(cgen, cpgen, m);
+	            System.out.println("Method End!");
 	        }
 	        gen = cgen;
 
