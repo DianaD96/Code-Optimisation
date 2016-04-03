@@ -69,7 +69,26 @@ public class ConstantFolder
 			return (int) ((LDC2_W)(handle.getInstruction())).getValue(cpgen);
 		}
 		else
-			return;
+			return 0;
+	}
+	
+	private int getLoadIntValue (InstructionHandle handle, InstructionList instList, ConstantPoolGen  cpgen, int load_index)
+	{
+		// get the int value
+		// iterate back until the value is found (where the instruction index for the ISTORE is the same as ILOAD)
+		
+		// start from the current handle
+		InstructionHandle newHandle = handle;
+		
+		System.out.println("WHYYYY " + (int)((ILOAD)(newHandle.getInstruction())).getIndex());
+		//iterate back
+		while (newHandle.getPrev()!=null)
+		{
+			if ( (load_index == (int)((ILOAD)(newHandle.getInstruction())).getIndex()) && (newHandle.getInstruction() instanceof ISTORE))
+				System.out.println("FOUND IT = " + ((ICONST)(newHandle.getInstruction())).getValue());
+			newHandle = newHandle.getPrev();
+		}
+		return 0;
 	}
 	 
 	 private void optimizeMethod(ClassGen cgen, ConstantPoolGen cpgen, Method method) {
@@ -92,13 +111,19 @@ public class ConstantFolder
 	        // InstructionHandle is a wrapper for actual Instructions
 	        for (InstructionHandle handle : instList.getInstructionHandles()) {
 
-				//System.out.println("instHandle= " + handle.getInstruction());
+				System.out.println("instHandle= " + handle.getInstruction());
 	            if (handle.getInstruction() instanceof IADD)
 	            {
-	            	int prev1 = getPrevInt(handle, instList, cpgen);
+	            	int prev1 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
 	            	System.out.println("prev= " + prev1);
 	            }
-	            	
+	            
+	            if (handle.getInstruction() instanceof ILOAD)
+	            {
+	            	int load_index = (int) ((ILOAD)(handle.getInstruction())).getIndex();
+	            	System.out.println("ILOAD_INDEX_VALUE = " + load_index);
+	            	getLoadIntValue(handle, instList,cpgen,load_index);
+	            }
                 
 			        // set max stack/local
 			        methodGen.setMaxStack();
