@@ -37,33 +37,39 @@ public class ConstantFolder
 
 	private int getPrevInt(InstructionHandle handle, InstructionList instList, ConstantPoolGen cpgen)
 	{
-		System.out.println("instruction = " + handle.getInstruction());
+		//System.out.println("instruction = " + handle.getInstruction());
 		if (handle.getInstruction() instanceof ICONST)
 		{
-			System.out.println("FROM ICONST = " + ((ICONST)(handle.getInstruction())).getValue());
-			System.out.println();
-		}
+			//System.out.println("FROM ICONST = " + ((ICONST)(handle.getInstruction())).getValue());
+			//System.out.println();
+			return (int) ((ICONST)(handle.getInstruction())).getValue();
+		} else
 		if (handle.getInstruction() instanceof BIPUSH)
 		{
-			System.out.println("FROM BIPUSH = " + ((BIPUSH)(handle.getInstruction())).getValue());
-			System.out.println();
-		}
+			//System.out.println("FROM BIPUSH = " + ((BIPUSH)(handle.getInstruction())).getValue());
+			//System.out.println();
+			return (int) ((BIPUSH)(handle.getInstruction())).getValue();
+		}else
 		if (handle.getInstruction() instanceof SIPUSH)
 		{
-			System.out.println("FROM SIPUSH = " + ((SIPUSH)(handle.getInstruction())).getValue());
-			System.out.println();
-		}
+			//System.out.println("FROM SIPUSH = " + ((SIPUSH)(handle.getInstruction())).getValue());
+			//System.out.println();
+			return (int) ((SIPUSH)(handle.getInstruction())).getValue();
+		}else
 		if (handle.getInstruction() instanceof LDC)
 		{
-			System.out.println("FROM LDC = " + ((LDC)(handle.getInstruction())).getValue(cpgen));
-			System.out.println();
-		}
+			//System.out.println("FROM LDC = " + ((LDC)(handle.getInstruction())).getValue(cpgen));
+			//System.out.println();
+			return (int) ((LDC)(handle.getInstruction())).getValue(cpgen);
+		}else
 		if (handle.getInstruction() instanceof LDC2_W)
 		{
-			System.out.println("FROM LDC2_W = " + ((LDC2_W)(handle.getInstruction())).getValue(cpgen));
-			System.out.println();
+			//System.out.println("FROM LDC2_W = " + ((LDC2_W)(handle.getInstruction())).getValue(cpgen));
+			//System.out.println();
+			return (int) ((LDC2_W)(handle.getInstruction())).getValue(cpgen);
 		}
-		return 0;
+		else
+			return;
 	}
 	 
 	 private void optimizeMethod(ClassGen cgen, ConstantPoolGen cpgen, Method method) {
@@ -87,12 +93,11 @@ public class ConstantFolder
 	        for (InstructionHandle handle : instList.getInstructionHandles()) {
 
 				//System.out.println("instHandle= " + handle.getInstruction());
-	            
-	        	
-	        	if ((handle.getInstruction() instanceof IF_ICMPLE)){
-	        		return;
-	        	}
-				getPrevInt(handle, instList, cpgen);
+	            if (handle.getInstruction() instanceof IADD)
+	            {
+	            	int prev1 = getPrevInt(handle, instList, cpgen);
+	            	System.out.println("prev= " + prev1);
+	            }
 	            	
                 
 			        // set max stack/local
