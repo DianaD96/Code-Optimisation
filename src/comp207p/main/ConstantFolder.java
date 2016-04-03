@@ -48,6 +48,11 @@ public class ConstantFolder
 			System.out.println("FROM BIPUSH = " + ((BIPUSH)(handle.getInstruction())).getValue());
 			System.out.println();
 		}
+		if (handle.getInstruction() instanceof SIPUSH)
+		{
+			System.out.println("FROM SIPUSH = " + ((SIPUSH)(handle.getInstruction())).getValue());
+			System.out.println();
+		}
 		return 0;
 	}
 	 
@@ -74,7 +79,7 @@ public class ConstantFolder
 				System.out.println("instHandle= " + handle.getInstruction());
 
 	        	//folding addition
-	            if (handle.getInstruction() instanceof IADD) {
+	            if (handle.getInstruction() instanceof BIPUSH) {
 	                InstructionHandle prev = handle.getPrev();
 	                
 	                getPrevInt(prev, instList, cpgen);
