@@ -2,6 +2,7 @@ package comp207p.main;
 import java.io.File;
 
 
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -37,6 +38,16 @@ public class ConstantFolder
 	private int getPrevInt(InstructionHandle handle, InstructionList instList, ConstantPoolGen cpgen)
 	{
 		System.out.println("instruction = " + handle.getInstruction());
+		if (handle.getInstruction() instanceof ICONST)
+		{
+			System.out.println("FROM ICONST = " + ((ICONST)(handle.getInstruction())).getValue());
+			System.out.println();
+		}
+		if (handle.getInstruction() instanceof BIPUSH)
+		{
+			System.out.println("FROM BIPUSH = " + ((BIPUSH)(handle.getInstruction())).getValue());
+			System.out.println();
+		}
 		return 0;
 	}
 	 
