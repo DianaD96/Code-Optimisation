@@ -84,8 +84,13 @@ public class ConstantFolder
 		//iterate back
 		while (newHandle.getPrev()!=null)
 		{
-			if ( (load_index == (int)((ILOAD)(newHandle.getInstruction())).getIndex()) && (newHandle.getInstruction() instanceof ISTORE))
-				System.out.println("FOUND IT = " + ((ICONST)(newHandle.getInstruction())).getValue());
+			if (newHandle.getInstruction() instanceof ISTORE)
+			{	
+				if ((load_index == (int)((ISTORE)(newHandle.getInstruction())).getIndex())) 
+				{
+					System.out.println("FOUND IT = " + getPrevInt(newHandle.getPrev(), instList, cpgen));
+				}
+			}		
 			newHandle = newHandle.getPrev();
 		}
 		return 0;
