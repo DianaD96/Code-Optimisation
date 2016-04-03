@@ -12,9 +12,11 @@ import java.io.PrintStream;
 /**
  * test simple folding
  */
+
+/*/
 public class SimpleFoldingTest {
 
-	/*/
+	
     SimpleFolding sf = new SimpleFolding();
     
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -36,5 +38,7 @@ public class SimpleFoldingTest {
         sf.simple();
         assertEquals("12412\n", outContent.toString());
     }
-  /*/
+  
 }
+
+/*/

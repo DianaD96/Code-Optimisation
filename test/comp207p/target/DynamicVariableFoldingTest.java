@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
  * Test dynamic variable folding
  */
 
+/*/
 public class DynamicVariableFoldingTest
 {
     DynamicVariableFolding dvf = new DynamicVariableFolding();
@@ -62,3 +63,4 @@ public class DynamicVariableFoldingTest
 
 
 }
+/*/
