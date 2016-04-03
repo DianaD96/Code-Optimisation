@@ -76,15 +76,10 @@ public class ConstantFolder
 	        // InstructionHandle is a wrapper for actual Instructions
 	        for (InstructionHandle handle : instList.getInstructionHandles()) {
 
-				System.out.println("instHandle= " + handle.getInstruction());
-
-	        	//folding addition
-	            if (handle.getInstruction() instanceof BIPUSH) {
-	                InstructionHandle prev = handle.getPrev();
-	                
-	                getPrevInt(prev, instList, cpgen);
+				//System.out.println("instHandle= " + handle.getInstruction());
+	            
+				getPrevInt(handle, instList, cpgen);
 	            	
-	            }
                 
 			        // set max stack/local
 			        methodGen.setMaxStack();
