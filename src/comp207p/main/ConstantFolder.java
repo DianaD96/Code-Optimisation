@@ -67,8 +67,13 @@ public class ConstantFolder
 			//System.out.println("FROM LDC2_W = " + ((LDC2_W)(handle.getInstruction())).getValue(cpgen));
 			//System.out.println();
 			return (int) ((LDC2_W)(handle.getInstruction())).getValue(cpgen);
-		}
-		else
+		}else
+		if (handle.getInstruction() instanceof ILOAD)
+		{
+			int load_index = (int) ((ILOAD)(handle.getInstruction())).getIndex();
+        	int value = getLoadIntValue(handle, instList,cpgen,load_index);
+        	return value;
+		}else
 			return 0;
 	}
 	
@@ -80,7 +85,6 @@ public class ConstantFolder
 		// start from the current handle
 		InstructionHandle newHandle = handle;
 		
-		System.out.println("WHYYYY " + (int)((ILOAD)(newHandle.getInstruction())).getIndex());
 		//iterate back
 		while (newHandle.getPrev()!=null)
 		{
@@ -88,7 +92,7 @@ public class ConstantFolder
 			{	
 				if ((load_index == (int)((ISTORE)(newHandle.getInstruction())).getIndex())) 
 				{
-					System.out.println("FOUND IT = " + getPrevInt(newHandle.getPrev(), instList, cpgen));
+					return getPrevInt(newHandle.getPrev(), instList, cpgen);
 				}
 			}		
 			newHandle = newHandle.getPrev();
@@ -96,6 +100,21 @@ public class ConstantFolder
 		return 0;
 	}
 	 
+	void optimizeArithmetic (InstructionHandle handle, InstructionList instList, ClassGen cgen, ConstantPoolGen cpgen)
+	{
+		//optimising addition
+		if (handle.getInstruction() instanceof IADD)
+        {
+			// searching the values we have to add
+			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
+			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	//adding the values
+        }
+	}
+	
 	 private void optimizeMethod(ClassGen cgen, ConstantPoolGen cpgen, Method method) {
 	        // Get the Code of the method, which is a collection of bytecode instructions
 	        Code methodCode = method.getCode();
@@ -115,20 +134,9 @@ public class ConstantFolder
 
 	        // InstructionHandle is a wrapper for actual Instructions
 	        for (InstructionHandle handle : instList.getInstructionHandles()) {
-
 				System.out.println("instHandle= " + handle.getInstruction());
-	            if (handle.getInstruction() instanceof IADD)
-	            {
-	            	int prev1 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
-	            	System.out.println("prev= " + prev1);
-	            }
-	            
-	            if (handle.getInstruction() instanceof ILOAD)
-	            {
-	            	int load_index = (int) ((ILOAD)(handle.getInstruction())).getIndex();
-	            	System.out.println("ILOAD_INDEX_VALUE = " + load_index);
-	            	getLoadIntValue(handle, instList,cpgen,load_index);
-	            }
+	        	optimizeArithmetic(handle, instList, cgen, cpgen);	            
+	         
                 
 			        // set max stack/local
 			        methodGen.setMaxStack();
