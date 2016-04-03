@@ -1,6 +1,7 @@
 package comp207p.target;
 
 import org.junit.Test;
+
 import org.junit.After;
 import org.junit.Before;
 
@@ -13,6 +14,7 @@ import java.io.PrintStream;
  */
 public class SimpleFoldingTest {
 
+	/*/
     SimpleFolding sf = new SimpleFolding();
     
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -34,5 +36,5 @@ public class SimpleFoldingTest {
         sf.simple();
         assertEquals("12412\n", outContent.toString());
     }
-
+  /*/
 }
