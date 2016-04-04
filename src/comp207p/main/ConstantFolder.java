@@ -66,12 +66,6 @@ public class ConstantFolder
 			//System.out.println();
 			return (int) ((LDC)(handle.getInstruction())).getValue(cpgen);
 		}else
-		if (handle.getInstruction() instanceof LDC2_W)
-		{
-			//System.out.println("FROM LDC2_W = " + ((LDC2_W)(handle.getInstruction())).getValue(cpgen));
-			//System.out.println();
-			return (int) ((LDC2_W)(handle.getInstruction())).getValue(cpgen);
-		}else
 		if (handle.getInstruction() instanceof ILOAD)
 		{
 			int load_index = (int) ((ILOAD)(handle.getInstruction())).getIndex();
@@ -89,7 +83,14 @@ public class ConstantFolder
 			//System.out.println("FROM LCONST = " + ((LCONST)(handle.getInstruction())).getValue());
 			//System.out.println();
 			return (long) ((LCONST)(handle.getInstruction())).getValue();
-		} else if (handle.getInstruction() instanceof LLOAD)
+		}else 
+		if (handle.getInstruction() instanceof LDC2_W)
+		{
+			//System.out.println("FROM LDC2_W = " + ((LDC2_W)(handle.getInstruction())).getValue(cpgen));
+			//System.out.println();
+			return (long) ((LDC2_W)(handle.getInstruction())).getValue(cpgen);
+		}else
+		if (handle.getInstruction() instanceof LLOAD)
 		{
 			int load_index = (int) ((LLOAD)(handle.getInstruction())).getIndex();
         	long value = getLoadLongValue(handle, instList,cpgen,load_index);
@@ -106,9 +107,16 @@ public class ConstantFolder
 			//System.out.println("FROM DCONST = " + ((DCONST)(handle.getInstruction())).getValue());
 			//System.out.println();
 			return (double) ((DCONST)(handle.getInstruction())).getValue();
-		} else if (handle.getInstruction() instanceof DLOAD)
+		}else
+		if (handle.getInstruction() instanceof LDC2_W)
 		{
-			int load_index = (int) ((LLOAD)(handle.getInstruction())).getIndex();
+			//System.out.println("FROM LDC2_W = " + ((LDC2_W)(handle.getInstruction())).getValue(cpgen));
+			//System.out.println();
+			return (double) ((LDC2_W)(handle.getInstruction())).getValue(cpgen);
+		}else 
+		if (handle.getInstruction() instanceof DLOAD)
+		{
+			int load_index = (int) ((DLOAD)(handle.getInstruction())).getIndex();
         	double value = getLoadDoubleValue(handle, instList,cpgen,load_index);
         	return value;
 		}else
@@ -123,6 +131,11 @@ public class ConstantFolder
 			//System.out.println("FROM FCONST = " + ((FCONST)(handle.getInstruction())).getValue());
 			//System.out.println();
 			return (float) ((FCONST)(handle.getInstruction())).getValue();
+		} else if (handle.getInstruction() instanceof LDC)
+		{
+			//System.out.println("FROM LDC = " + ((LDC)(handle.getInstruction())).getValue(cpgen));
+			//System.out.println();
+			return (float) ((LDC)(handle.getInstruction())).getValue(cpgen);
 		} else if (handle.getInstruction() instanceof FLOAD)
 		{
 			int load_index = (int) ((FLOAD)(handle.getInstruction())).getIndex();
@@ -271,7 +284,7 @@ public class ConstantFolder
         	System.out.println("FOUND VALUE 1 = " + value1);
         	System.out.println("FOUND VALUE 2 = " + value2);
         	
-        	Integer intObj = new Integer(value1-value2);
+        	Integer intObj = new Integer(value2-value1);
         	byte new_value = intObj.byteValue();
         	System.out.println("VALUE ADDED IN BYTES = " + new_value);
         	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
@@ -318,8 +331,8 @@ public class ConstantFolder
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
         	System.out.println("FOUND VALUE 1 = " + value1);
         	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Integer intObj = new Integer(value1/value2);
+ 
+        	Integer intObj = new Integer(value2/value1);
         	byte new_value = intObj.byteValue();
         	System.out.println("VALUE ADDED IN BYTES = " + new_value);
         	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
@@ -334,16 +347,16 @@ public class ConstantFolder
                 e.printStackTrace();
             }
 		}
-		//optimising reminder for integers
+		//optimising remainder for integers
 		else if (handle.getInstruction() instanceof IREM)
 		{
-			// searching the values we have to get the reminder of
+			// searching the values we have to get the remainder of
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
         	System.out.println("FOUND VALUE 1 = " + value1);
         	System.out.println("FOUND VALUE 2 = " + value2);
         	
-        	Integer intObj = new Integer(value1%value2);
+        	Integer intObj = new Integer(value2%value1);
         	byte new_value = intObj.byteValue();
         	System.out.println("VALUE ADDED IN BYTES = " + new_value);
         	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
@@ -358,77 +371,370 @@ public class ConstantFolder
                 e.printStackTrace();
             }
 		}
+		
+		/** ******************************************************************** **/
 		//optimising addition for longs
 		else if (handle.getInstruction() instanceof LADD)
 	    {
+			// searching the values we have to add
+			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
+			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
+			System.out.println("FOUND VALUE 1 = " + value1);
+			System.out.println("FOUND VALUE 2 = " + value2);
+			        	
+			Long longObj = new Long(value1+value2);		
+			byte new_value = longObj.byteValue();
+			System.out.println("VALUE ADDED IN BYTES = " + new_value);
+			//adding the values - BIPUSH pushes the byte value onto the stack as an Long value
+			instList.insert(handle, new BIPUSH(new_value));
+			        	
+			try {
+				// delete the old values
+			    instList.delete(handle.getPrev());
+			    instList.delete(handle.getPrev().getPrev());
+			} catch (TargetLostException e) {
+			    // TODO Auto-generated catch block
+			    e.printStackTrace();
+			}
 	    }
 		//optimising subtraction for longs
 		else if (handle.getInstruction() instanceof LSUB)
 		{
-					
+			// searching the values we have to subtract
+			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
+			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
+			System.out.println("FOUND VALUE 1 = " + value1);
+			System.out.println("FOUND VALUE 2 = " + value2);
+						        	
+			Long longObj = new Long(value2-value1);	
+			byte new_value = longObj.byteValue();
+			System.out.println("VALUE ADDED IN BYTES = " + new_value);
+			//adding the values - BIPUSH pushes the byte value onto the stack as an Long value
+			instList.insert(handle, new BIPUSH(new_value));
+						        	
+			try {
+				// delete the old values
+				instList.delete(handle.getPrev());
+				instList.delete(handle.getPrev().getPrev());
+			} catch (TargetLostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		//optimising multiplication for longs
 		else if (handle.getInstruction() instanceof LMUL)
 		{
-		        	
+			// searching the values we have to multiply
+			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
+			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Long longObj = new Long(value1*value2);
+        	byte new_value = longObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 		}
 		//optimising division for longs
 		else if (handle.getInstruction() instanceof LDIV)
 		{
-					
+			// searching the values we have to divide
+			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
+			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+ 
+        	Long longObj = new Long(value2/value1);
+        	byte new_value = longObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }				
 		}
-		//optimising reminder for longs
+		//optimising remainder for longs
 		else if (handle.getInstruction() instanceof LREM)
 		{
-					
+			// searching the values we have to get the remainder of
+			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
+			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+ 
+        	Long longObj = new Long(value2%value1);
+        	byte new_value = longObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }					
 		}
+		
+		/** ******************************************************************** **/
 		//optimising addition for floats
 		else if (handle.getInstruction() instanceof FADD)
 		{
+			// searching the values we have to add
+			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
+			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Float floatObj = new Float(value1+value2);
+        	byte new_value = floatObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 		}
 		//optimising subtraction for floats
 		else if (handle.getInstruction() instanceof FSUB)
 		{
-							
+			// searching the values we have to subtract
+			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
+			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Float floatObj = new Float(value2-value1);
+        	byte new_value = floatObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }					
 		}
 		//optimising multiplication for floats
 		else if (handle.getInstruction() instanceof FMUL)
 		{
-				        	
+			// searching the values we have to multiply
+			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
+			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Float floatObj = new Float(value1*value2);
+        	byte new_value = floatObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }		        	
 		}
 		//optimising division for floats
 		else if (handle.getInstruction() instanceof FDIV)
 		{
-							
+			// searching the values we have to divide
+			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
+			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Float floatObj = new Float(value2/value1);
+        	byte new_value = floatObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }					
 		}
-		//optimising reminder for floats
+		//optimising remainder for floats
 		else if (handle.getInstruction() instanceof FREM)
 		{
-							
+			// searching the values we have to get the remainder of
+			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
+			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Float floatObj = new Float(value2%value1);
+        	byte new_value = floatObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }				
 		}
+		
+		/** ******************************************************************** **/
 		//optimising addition for doubles
 		else if (handle.getInstruction() instanceof DADD)
 		{
+			// searching the values we have to add
+			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
+			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Double doubleObj = new Double(value1+value2);
+        	byte new_value = doubleObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 		}
 		//optimising subtraction for doubles
 		else if (handle.getInstruction() instanceof DSUB)
 		{
-							
+			// searching the values we have to subtract
+			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
+			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Double doubleObj = new Double(value2-value1);
+        	byte new_value = doubleObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }						
 		}
 		//optimising multiplication for doubles
 		else if (handle.getInstruction() instanceof DMUL)
 		{
-				        	
+			// searching the values we have to multiply
+			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
+			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Double doubleObj = new Double(value1*value2);
+        	byte new_value = doubleObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }		        	
 		}
 		//optimising division for doubles
 		else if (handle.getInstruction() instanceof DDIV)
-		{
-							
+		{// searching the values we have to divide
+			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
+			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Double doubleObj = new Double(value2/value1);
+        	byte new_value = doubleObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }				
 		}
-		//optimising reminder for doubles
+		//optimising remainder for doubles
 		else if (handle.getInstruction() instanceof DREM)
 		{
-							
+			// searching the values we have to get the remainder of
+			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
+			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
+        	System.out.println("FOUND VALUE 1 = " + value1);
+        	System.out.println("FOUND VALUE 2 = " + value2);
+        	
+        	Double doubleObj = new Double(value2%value1);
+        	byte new_value = doubleObj.byteValue();
+        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
+        	
+        	try {
+                // delete the old values
+                instList.delete(handle.getPrev());
+                instList.delete(handle.getPrev().getPrev());
+            } catch (TargetLostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }					
 		}
 	}
 	
