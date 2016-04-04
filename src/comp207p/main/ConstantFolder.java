@@ -257,23 +257,28 @@ public class ConstantFolder
 			// searching the values we have to add
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
+        	System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
+        	System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
         	
         	Integer intObj = new Integer(value1+value2);
         	byte new_value = intObj.byteValue();
         	System.out.println("VALUE ADDED IN BYTES = " + new_value);
-        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
-        	instList.insert(handle, new BIPUSH(new_value));
         	
+        	
+        	handle= handle.getNext();
         	try {
+            	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
                 // delete the old values
-                instList.delete(handle.getPrev());
+        		instList.delete(handle.getPrev());
                 instList.delete(handle.getPrev().getPrev());
+                instList.delete(handle.getPrev().getPrev().getPrev());
             } catch (TargetLostException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+        	
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new BIPUSH(new_value));
         }
 		//optimising subtraction for integers
 		else if (handle.getInstruction() instanceof ISUB)
