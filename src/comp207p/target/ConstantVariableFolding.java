@@ -4,8 +4,8 @@ public class ConstantVariableFolding
 {
     public int methodOne(){
         int a = 62;
-        int b = (a + 764);
-        int c = b + 10;
+        int b = (a + 764); //826
+        // int c = b + 10; //836
         return b + 1234 - a;
     }
 

@@ -263,7 +263,7 @@ public class ConstantFolder
         	Integer intObj = new Integer(value1+value2);
         	byte new_value = intObj.byteValue();
         	int sum = value1+value2;
-        	System.out.println("VALUE ADDED IN BYTES = " + sum);
+        	System.out.println("VALUE ADDED = " + sum);
         	
         	
         	handle= handle.getNext();
@@ -278,7 +278,8 @@ public class ConstantFolder
                 e.printStackTrace();
             }
         	
-        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	//adding the values - LDC pushes the int value onto the stack 
+        	/*!! better solution? !!*/
         	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(sum)));
          }
 		//optimising subtraction for integers
@@ -287,23 +288,27 @@ public class ConstantFolder
 			// searching the values we have to subtract
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
+        	System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + value1);
+        	System.out.println("FOUND VALUE 2 = " +  handle.getPrev().getPrev().getInstruction() + value2);
         	
         	Integer intObj = new Integer(value2-value1);
         	byte new_value = intObj.byteValue();
-        	System.out.println("VALUE ADDED IN BYTES = " + new_value);
-        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
-        	instList.insert(handle, new BIPUSH(new_value));
+        	int diff = value2-value1;
+        	System.out.println("VALUE ADDED = " + diff);
         	
         	try {
+           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
                 // delete the old values
                 instList.delete(handle.getPrev());
                 instList.delete(handle.getPrev().getPrev());
+                instList.delete(handle.getPrev().getPrev().getPrev());
             } catch (TargetLostException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+        	
+        	//adding the values - BIPUSH pushes the byte value onto the stack as an integer value
+        	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(diff)));
 		}
 		//optimising multiplication for integers
 		else if (handle.getInstruction() instanceof IMUL)
@@ -321,6 +326,7 @@ public class ConstantFolder
         	instList.insert(handle, new BIPUSH(new_value));
         	
         	try {
+           	   System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
                 // delete the old values
                 instList.delete(handle.getPrev());
                 instList.delete(handle.getPrev().getPrev());
