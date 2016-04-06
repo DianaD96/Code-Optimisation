@@ -1,11 +1,11 @@
 package comp207p.target;
 
 public class DynamicVariableFolding {
-    public int methodOne() {
+    public int methodOne() { //works
         int a = 42;
-        int b = (a + 764) * 3;
-        a = b - 67;
-        return b + 1234 - a;
+        int b = (a + 764) * 3; //806*3=2418
+        a = b - 67; //2351
+        return b + 1234 - a; //3652-2351=1301
     }
 
     public boolean methodTwo() {
@@ -16,12 +16,12 @@ public class DynamicVariableFolding {
         return x > y;
     }
 
-    public int methodThree() {
+    public int methodThree() { //works
         int i = 0;
-        int j = i + 3;
-        i = j + 4;
-        j = i + 5;
-        return i * j;
+        int j = i + 3; //3
+        i = j + 4; //7
+        j = i + 5; //12
+        return i * j; //84
     }
     
     public int methodFour(){

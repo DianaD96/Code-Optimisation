@@ -265,90 +265,170 @@ public class ConstantFolder
 	}
 	/** ****************************************************************************************************************** **/
 	
+	
+	
+	//delete handles
+	   private void delete_handles(InstructionList instList, InstructionHandle handle, InstructionHandle handle_to_delete_1, InstructionHandle handle_to_delete_2) 
+	   {
+		   if(handle!=null)
+		   {
+			   System.out.println("DELETING HANDLES = " + handle);
+			   try {
+					instList.delete(handle);
+				} catch (TargetLostException e) {
+					e.printStackTrace();
+				}
+		   }
+		   
+		   if(handle_to_delete_1!=null)
+		   {
+			   System.out.println("DELETING HANDLES = " + handle_to_delete_1);
+			   try {
+					instList.delete(handle_to_delete_1);
+				} catch (TargetLostException e) {
+					e.printStackTrace();
+				}
+		   }
+		   
+		   if(handle_to_delete_2!=null)
+		   {
+			   System.out.println("DELETING HANDLES = " + handle_to_delete_2);
+			   try {
+					instList.delete(handle_to_delete_2);
+				} catch (TargetLostException e) {
+					e.printStackTrace();
+				}
+		   }
+	}
+	   
 	// optimise comparisons
 	void optimizeComparisons (InstructionHandle handle, InstructionList instList, ClassGen cgen, ConstantPoolGen cpgen)
 	{
+		if (handle.getInstruction() instanceof IF_ACMPEQ || handle.getInstruction() instanceof IF_ACMPNE || handle.getInstruction() instanceof IF_ICMPEQ || handle.getInstruction() instanceof IF_ICMPEQ || handle.getInstruction() instanceof IF_ICMPGE || handle.getInstruction() instanceof IF_ICMPGT || handle.getInstruction() instanceof IF_ICMPLE || handle.getInstruction() instanceof IF_ICMPLT || handle.getInstruction() instanceof IF_ICMPNE)
+		{
+			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
+			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
+			
+			//Searching for the values
+			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
+			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
+			
+			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
+			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
+			
+			instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(value1)));
+            instList.insert(handle_to_delete_2, new LDC(cgen.getConstantPool().addInteger(value2)));
+            
+			System.out.println("VALUE ADDED = " + value1);
+			System.out.println("VALUE ADDED = " + value2);
+
+			delete_handles(instList,null,handle_to_delete_1, handle_to_delete_2);
+		}
+		
+		if (handle.getInstruction() instanceof IFEQ || handle.getInstruction() instanceof IFGE || handle.getInstruction() instanceof IFGT || handle.getInstruction() instanceof IFLE || handle.getInstruction() instanceof IFLT || handle.getInstruction() instanceof IFNE)
+		{
+			InstructionHandle handle_to_delete_1 = handle.getPrev();
+			
+			//Searching for the values
+			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
+			
+			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
+
+			instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(value1)));
+			System.out.println("VALUE ADDED = " + value1);
+
+			delete_handles(instList,null,handle_to_delete_1, null);
+			
+		}
+		
 		//optimising float comparisons
 		if (handle.getInstruction() instanceof FCMPL || handle.getInstruction() instanceof FCMPG)
 		{
+			
+			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
+			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
+			
 			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
 			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
 			
-			handle= handle.getNext();
-        	try {
-            	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-        		instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
+			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
+			
         	if (handle.getInstruction() instanceof FCMPL)
     		{
 				if (value1<value2)
+				{
 					instList.insert(handle, new LDC(1));
+					System.out.println("VALUE ADDED = 1 ");
+				}
 				else
+				{
 					instList.insert(handle, new LDC(0));
+					System.out.println("VALUE ADDED = 0 ");
+				}
     		}
         	if (handle.getInstruction() instanceof FCMPG)
     		{
         		if (value1>value2)
+        		{
         			instList.insert(handle, new LDC(1));
+					System.out.println("VALUE ADDED = 1 ");
+        		}
         		else
+        		{
         			instList.insert(handle, new LDC(0));
+					System.out.println("VALUE ADDED = 0 ");
+        		}
     		}
+        	
+        	delete_handles(instList, handle, handle_to_delete_1, handle_to_delete_2);
 		}
 		
 		//optimising double comparisons
 		if (handle.getInstruction() instanceof DCMPL || handle.getInstruction() instanceof DCMPG)
 		{
+			
+			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
+			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
+			
 			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
 			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
 			
-			handle= handle.getNext();
-        	try {
-            	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-        		instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
+			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
+			
         	if (handle.getInstruction() instanceof DCMPL)
     		{
 				if (value1<value2)
+				{
 					instList.insert(handle, new LDC(1));
+					System.out.println("VALUE ADDED = 1 ");
+				}
 				else
+				{
 					instList.insert(handle, new LDC(0));
+					System.out.println("VALUE ADDED = 0 ");
+				}
     		}
         	if (handle.getInstruction() instanceof DCMPG)
     		{
         		if (value1>value2)
+        		{
     				instList.insert(handle, new LDC(1));
+					System.out.println("VALUE ADDED = 1 ");
+        		}
     			else
+    			{
     				instList.insert(handle, new LDC(0));
+					System.out.println("VALUE ADDED = 0 ");
+    			}
     		}
+        	delete_handles(instList, handle, handle_to_delete_1, handle_to_delete_2);
 		}
 	}
 
 	/** ****************************************************************************************************************** **/
 	
-	
-	//delete handles
-	   private void delete_handles(InstructionList instList, InstructionHandle handle, InstructionHandle handle_to_delete_1, InstructionHandle handle_to_delete_2) {
-			try {
-				instList.delete(handle);
-				instList.delete(handle_to_delete_1);
-				instList.delete(handle_to_delete_2);
-			} catch (TargetLostException e) {
-				e.printStackTrace();
-			}
-	}
-
 	// optimise arithmetic operations
 	void optimizeArithmetic (InstructionHandle handle, InstructionList instList, ClassGen cgen, ConstantPoolGen cpgen)
 	{ 
@@ -541,7 +621,7 @@ public class ConstantFolder
 	        for (Method m : methods) {
 	           // System.out.println("Method: " + m.getName());
 	            optimizeMethod(cgen, cpgen, m);
-	            System.out.println("Method End!");
+	            System.out.println("Method End!\n");
 	        }
 	        gen = cgen;
 
