@@ -162,7 +162,7 @@ public class ConstantFolder
 		//iterate back
 		while (newHandle.getPrev()!=null)
 		{
-			System.out.println("!!!!!!!!!!!!!!! " + newHandle.getInstruction());
+			//System.out.println("!!!!!!!!!!!!!!! " + newHandle.getInstruction());
 			if (newHandle.getInstruction() instanceof ISTORE)
 			{
 				//System.out.println("HERE2");
@@ -340,13 +340,13 @@ public class ConstantFolder
 
 	// optimise arithmetic operations
 	void optimizeArithmetic (InstructionHandle handle, InstructionList instList, ClassGen cgen, ConstantPoolGen cpgen)
-	{
+	{ 
 		//optimising arithmetic for integers
 		if (handle.getInstruction() instanceof IADD || handle.getInstruction() instanceof ISUB || handle.getInstruction() instanceof IMUL ||handle.getInstruction() instanceof IDIV || handle.getInstruction() instanceof IREM)
 		{
-			//Searching for the values
 			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
 			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
+			//Searching for the values
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
 			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
@@ -380,6 +380,8 @@ public class ConstantFolder
 		//optimising arithmetic for longs
 		if (handle.getInstruction() instanceof LADD || handle.getInstruction() instanceof LSUB || handle.getInstruction() instanceof LMUL ||handle.getInstruction() instanceof LDIV || handle.getInstruction() instanceof LREM)
 		{
+			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
+			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
 			//Searching for the values
 			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
 			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
@@ -402,26 +404,18 @@ public class ConstantFolder
 				val = value2%value1;
 			}
 			System.out.println("VALUE ADDED = " + val);
-		        	
-			handle = handle.getNext();
-		    try {
-		      	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-		         // delete the old values
-		      	 instList.delete(handle.getPrev());
-		         instList.delete(handle.getPrev().getPrev());
-		         instList.delete(handle.getPrev().getPrev().getPrev());
-		    } catch (TargetLostException e) {
-		    	// TODO Auto-generated catch block
-		        e.printStackTrace();
-		    }
-		        	
+		        		
 		    instList.insert(handle, new LDC2_W(cgen.getConstantPool().addLong(val)));
+        	delete_handles(instList, handle,handle_to_delete_1, handle_to_delete_2);
+
 		}
 		
 		/** ******************************************************************** **/
 		//optimising arithmetic for Floats
 		if (handle.getInstruction() instanceof FADD || handle.getInstruction() instanceof FSUB || handle.getInstruction() instanceof FMUL ||handle.getInstruction() instanceof FDIV || handle.getInstruction() instanceof FREM)
 		{
+			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
+			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
 			//Searching for the values
 			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
 			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
@@ -445,25 +439,17 @@ public class ConstantFolder
 			}
 			System.out.println("VALUE ADDED = " + val);
 		        	
-			handle = handle.getNext();
-		    try {
-		      	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-		         // delete the old values
-		      	 instList.delete(handle.getPrev());
-		         instList.delete(handle.getPrev().getPrev());
-		         instList.delete(handle.getPrev().getPrev().getPrev());
-		    } catch (TargetLostException e) {
-		    	// TODO Auto-generated catch block
-		        e.printStackTrace();
-		    }
-		
 		    instList.insert(handle, new LDC(cgen.getConstantPool().addFloat(val)));
+        	delete_handles(instList, handle,handle_to_delete_1, handle_to_delete_2);
+
 		}
 		
 		/** ******************************************************************** **/
 		//optimising arithmetic for doubles
 		if (handle.getInstruction() instanceof DADD || handle.getInstruction() instanceof DSUB || handle.getInstruction() instanceof DMUL ||handle.getInstruction() instanceof DDIV || handle.getInstruction() instanceof DREM)
 		{
+			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
+			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
 			//Searching for the values
 			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
 			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
@@ -487,18 +473,9 @@ public class ConstantFolder
 			}
 			System.out.println("VALUE ADDED = " + val);
 		        	
-			handle = handle.getNext();
-		    try {
-		      	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-		         // delete the old values
-		      	 instList.delete(handle.getPrev());
-		         instList.delete(handle.getPrev().getPrev());
-		         instList.delete(handle.getPrev().getPrev().getPrev());
-		    } catch (TargetLostException e) {
-		    	// TODO Auto-generated catch block
-		        e.printStackTrace();
-		    }
 		    instList.insert(handle, new LDC2_W(cgen.getConstantPool().addDouble(val)));
+        	delete_handles(instList, handle,handle_to_delete_1, handle_to_delete_2);
+
 		}
 	 }
 	
