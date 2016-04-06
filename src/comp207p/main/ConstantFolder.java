@@ -247,9 +247,8 @@ public class ConstantFolder
 	// optimise comparisons
 	void optimizeComparisons (InstructionHandle handle, InstructionList instList, ClassGen cgen, ConstantPoolGen cpgen)
 	{
-		
-		//optimising float comparison - less than
-		if (handle.getInstruction() instanceof FCMPL)
+		//optimising float comparisons
+		if (handle.getInstruction() instanceof FCMPL || handle.getInstruction() instanceof FCMPG)
 		{
 			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
 			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
@@ -265,65 +264,24 @@ public class ConstantFolder
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        	
-			if (value1<value2)
-				instList.insert(handle, new LDC(1));
-			else
-				instList.insert(handle, new LDC(0));
-		}
-		
-		//optimising float comparison - greater than
-		if (handle.getInstruction() instanceof FCMPG)
-		{
-			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
-			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
-			
-			handle= handle.getNext();
-        	try {
-            	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-        		instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-			if (value1>value2)
-				instList.insert(handle, new LDC(1));
-			else
-				instList.insert(handle, new LDC(0));
-		}
-		
-		// optimising long comparison - less than
-		if (handle.getInstruction() instanceof DCMPL)
-		{
-			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
-			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
-			
-			handle= handle.getNext();
-        	try {
-            	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-        		instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-			if (value1<value2)
-				instList.insert(handle, new LDC(1));
-			else if (value1==value2)
+        	if (handle.getInstruction() instanceof FCMPL)
+    		{
+				if (value1<value2)
+					instList.insert(handle, new LDC(1));
+				else
 					instList.insert(handle, new LDC(0));
-			else if (value1>value2)
-					instList.insert(handle, new LDC(-1));
+    		}
+        	if (handle.getInstruction() instanceof FCMPG)
+    		{
+        		if (value1>value2)
+        			instList.insert(handle, new LDC(1));
+        		else
+        			instList.insert(handle, new LDC(0));
+    		}
 		}
 		
-		//optimising double comparison - less than 
-		if (handle.getInstruction() instanceof DCMPL)
+		//optimising double comparisons
+		if (handle.getInstruction() instanceof DCMPL || handle.getInstruction() instanceof DCMPG)
 		{
 			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
 			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
@@ -339,58 +297,55 @@ public class ConstantFolder
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        	
-			if (value1<value2)
-				instList.insert(handle, new LDC(1));
-			else
-				instList.insert(handle, new LDC(0));
-		}
-		
-		//optimising double comparison - greater than
-		if (handle.getInstruction() instanceof DCMPG)
-		{
-			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
-			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
-			
-			handle= handle.getNext();
-        	try {
-            	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-        		instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-			if (value1>value2)
-				instList.insert(handle, new LDC(1));
-			else
-				instList.insert(handle, new LDC(0));
+        	if (handle.getInstruction() instanceof DCMPL)
+    		{
+				if (value1<value2)
+					instList.insert(handle, new LDC(1));
+				else
+					instList.insert(handle, new LDC(0));
+    		}
+        	if (handle.getInstruction() instanceof DCMPG)
+    		{
+        		if (value1>value2)
+    				instList.insert(handle, new LDC(1));
+    			else
+    				instList.insert(handle, new LDC(0));
+    		}
 		}
 	}
 	
+	/** ****************************************************************************************************************** **/
 	
 	// optimise arithmetic operations
 	void optimizeArithmetic (InstructionHandle handle, InstructionList instList, ClassGen cgen, ConstantPoolGen cpgen)
 	{
-		//optimising addition for integers
-		if (handle.getInstruction() instanceof IADD)
-        {
-			// searching the values we have to add
+		//optimising arithmetic for integers
+		if (handle.getInstruction() instanceof IADD || handle.getInstruction() instanceof ISUB || handle.getInstruction() instanceof IMUL ||handle.getInstruction() instanceof IDIV || handle.getInstruction() instanceof IREM)
+		{
+			//Searching for the values
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
-        	System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
+			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
+			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
+			int val = 0;
+			if (handle.getInstruction() instanceof IADD){
+				val = value1+value2;
+			}
+			if (handle.getInstruction() instanceof ISUB){
+				val = value2-value1;
+			}
+			if (handle.getInstruction() instanceof IMUL){
+				val = value2*value1;
+			}
+			if (handle.getInstruction() instanceof IDIV){
+				val = value2/value1;
+			}
+			if (handle.getInstruction() instanceof IREM){
+				val = value2%value1;
+			}
+			System.out.println("VALUE ADDED = " + val);
         	
-        	Integer intObj = new Integer(value1+value2);
-        	byte new_value = intObj.byteValue();
-        	int sum = value1+value2;
-        	System.out.println("VALUE ADDED = " + sum);
-        	
-        	
-        	handle= handle.getNext();
+			handle = handle.getNext();
         	try {
             	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
                 // delete the old values
@@ -404,566 +359,134 @@ public class ConstantFolder
         	
         	//adding the values - LDC pushes the int value onto the stack 
         	/*!! better solution? !!*/
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(sum)));
-         }
-		//optimising subtraction for integers
-		else if (handle.getInstruction() instanceof ISUB)
-		{	
-			// searching the values we have to subtract
-			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
-			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + value1);
-        	System.out.println("FOUND VALUE 2 = " +  handle.getPrev().getPrev().getInstruction() + value2);
-        	
-        	Integer intObj = new Integer(value2-value1);
-        	byte new_value = intObj.byteValue();
-        	int diff = value2-value1;
-        	System.out.println("VALUE ADDED = " + diff);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(diff)));
+        	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(val)));
 		}
-		//optimising multiplication for integers
-		else if (handle.getInstruction() instanceof IMUL)
-        {
-			// searching the values we have to multiply
-			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
-			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Integer intObj = new Integer(value1*value2);
-        	byte new_value = intObj.byteValue();
-        	int mul = value1*value2;
-        	System.out.println("VALUE ADDED = " + mul);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(mul)));
-        }
-		//optimising division for integers
-		else if (handle.getInstruction() instanceof IDIV)
+        
+		/** ******************************************************************** **/
+		//optimising arithmetic for longs
+		if (handle.getInstruction() instanceof LADD || handle.getInstruction() instanceof LSUB || handle.getInstruction() instanceof LMUL ||handle.getInstruction() instanceof LDIV || handle.getInstruction() instanceof LREM)
 		{
-			// searching the values we have to divide
-			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
-			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
- 
-        	Integer intObj = new Integer(value2/value1);
-        	byte new_value = intObj.byteValue();
-        	int div = value2/value1;
-        	System.out.println("VALUE ADDED = " + div);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(div)));
-		}
-		//optimising remainder for integers
-		else if (handle.getInstruction() instanceof IREM)
-		{
-			// searching the values we have to get the remainder of
-			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
-			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Integer intObj = new Integer(value2%value1);
-        	byte new_value = intObj.byteValue();
-        	int rem = value2%value1;
-        	System.out.println("VALUE ADDED = " + rem);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(rem)));
+			//Searching for the values
+			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
+			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
+			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
+			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
+			long val = 0;
+			if (handle.getInstruction() instanceof LADD){
+				val = value1+value2;
+			}
+			if (handle.getInstruction() instanceof LSUB){
+				val = value2-value1;
+			}
+			if (handle.getInstruction() instanceof LMUL){
+				val = value2*value1;
+			}
+			if (handle.getInstruction() instanceof LDIV){
+				val = value2/value1;
+			}
+			if (handle.getInstruction() instanceof LREM){
+				val = value2%value1;
+			}
+			System.out.println("VALUE ADDED = " + val);
+		        	
+			handle = handle.getNext();
+		    try {
+		      	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
+		         // delete the old values
+		      	 instList.delete(handle.getPrev());
+		         instList.delete(handle.getPrev().getPrev());
+		         instList.delete(handle.getPrev().getPrev().getPrev());
+		    } catch (TargetLostException e) {
+		    	// TODO Auto-generated catch block
+		        e.printStackTrace();
+		    }
+		        	
+		    instList.insert(handle, new LDC2_W(cgen.getConstantPool().addLong(val)));
 		}
 		
 		/** ******************************************************************** **/
-		//optimising addition for longs
-		else if (handle.getInstruction() instanceof LADD)
-	    {
-			// searching the values we have to add
-			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
-			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
-			System.out.println("FOUND VALUE 1 = " + value1);
-			System.out.println("FOUND VALUE 2 = " + value2);
-			        	
-			Long longObj = new Long(value1+value2);		
-			byte new_value = longObj.byteValue();
-			long sum = value1+value2;
-			System.out.println("VALUE ADDED = " + sum);
-			
-        	handle= handle.getNext();
-			try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addLong(sum)));
-	    }
-		//optimising subtraction for longs
-		else if (handle.getInstruction() instanceof LSUB)
+		//optimising arithmetic for Floats
+		if (handle.getInstruction() instanceof FADD || handle.getInstruction() instanceof FSUB || handle.getInstruction() instanceof FMUL ||handle.getInstruction() instanceof FDIV || handle.getInstruction() instanceof FREM)
 		{
-			// searching the values we have to subtract
-			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
-			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
-			System.out.println("FOUND VALUE 1 = " + value1);
-			System.out.println("FOUND VALUE 2 = " + value2);
-						        	
-			Long longObj = new Long(value2-value1);	
-			byte new_value = longObj.byteValue();
-		    long diff = value2-value1;
-			System.out.println("VALUE ADDED = " + new_value);
-			
-        	handle= handle.getNext();
-			try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addLong(diff)));
-		}
+			//Searching for the values
+			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
+			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
+			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
+			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
+			float val = 0;
+			if (handle.getInstruction() instanceof FADD){
+				val = value1+value2;
+			}
+			if (handle.getInstruction() instanceof FSUB){
+				val = value2-value1;
+			}
+			if (handle.getInstruction() instanceof FMUL){
+				val = value2*value1;
+			}
+			if (handle.getInstruction() instanceof FDIV){
+				val = value2/value1;
+			}
+			if (handle.getInstruction() instanceof FREM){
+				val = value2%value1;
+			}
+			System.out.println("VALUE ADDED = " + val);
+		        	
+			handle = handle.getNext();
+		    try {
+		      	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
+		         // delete the old values
+		      	 instList.delete(handle.getPrev());
+		         instList.delete(handle.getPrev().getPrev());
+		         instList.delete(handle.getPrev().getPrev().getPrev());
+		    } catch (TargetLostException e) {
+		    	// TODO Auto-generated catch block
+		        e.printStackTrace();
+		    }
 		
-		//optimising multiplication for longs
-		else if (handle.getInstruction() instanceof LMUL)
-		{
-			// searching the values we have to multiply
-			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
-			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Long longObj = new Long(value1*value2);
-        	byte new_value = longObj.byteValue();
-        	long mul = value1*value2;
-        	System.out.println("VALUE ADDED = " + mul);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addLong(mul)));
-		}
-		//optimising division for longs
-		else if (handle.getInstruction() instanceof LDIV)
-		{
-			// searching the values we have to divide
-			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
-			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
- 
-        	Long longObj = new Long(value2/value1);
-        	byte new_value = longObj.byteValue();
-        	long div = value2/value1;
-        	System.out.println("VALUE ADDED = " + div);
-        
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addLong(div)));		
-		}
-		//optimising remainder for longs
-		else if (handle.getInstruction() instanceof LREM)
-		{
-			// searching the values we have to get the remainder of
-			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
-			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
- 
-        	Long longObj = new Long(value2%value1);
-        	byte new_value = longObj.byteValue();
-        	long rem = value2%value1;
-        	System.out.println("VALUE ADDED = " + rem);
-
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addLong(rem)));			
+		    instList.insert(handle, new LDC(cgen.getConstantPool().addFloat(val)));
 		}
 		
 		/** ******************************************************************** **/
-		//optimising addition for floats
-		else if (handle.getInstruction() instanceof FADD)
+		//optimising arithmetic for doubles
+		if (handle.getInstruction() instanceof DADD || handle.getInstruction() instanceof DSUB || handle.getInstruction() instanceof DMUL ||handle.getInstruction() instanceof DDIV || handle.getInstruction() instanceof DREM)
 		{
-			// searching the values we have to add
-			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
-			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Float floatObj = new Float(value1+value2);
-        	byte new_value = floatObj.byteValue();
-        	float sum = value1+value2;
-        	System.out.println("VALUE ADDED = " + sum);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addFloat(sum)));
-		}
-		//optimising subtraction for floats
-		else if (handle.getInstruction() instanceof FSUB)
-		{
-			// searching the values we have to subtract
-			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
-			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Float floatObj = new Float(value2-value1);
-        	byte new_value = floatObj.byteValue();
-        	float diff = value2-value1;
-        	System.out.println("VALUE ADDED = " + diff);
-        
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addFloat(diff)));					
-		}
-		//optimising multiplication for floats
-		else if (handle.getInstruction() instanceof FMUL)
-		{
-			// searching the values we have to multiply
-			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
-			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Float floatObj = new Float(value1*value2);
-        	byte new_value = floatObj.byteValue();
-        	float mul = value1*value2;
-        	System.out.println("VALUE ADDED IN BYTES = " + mul);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addFloat(mul)));		        	
-		}
-		//optimising division for floats
-		else if (handle.getInstruction() instanceof FDIV)
-		{
-			// searching the values we have to divide
-			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
-			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Float floatObj = new Float(value2/value1);
-        	byte new_value = floatObj.byteValue();
-        	float div = value2/value1;
-        	System.out.println("VALUE ADDED IN BYTES = " + div);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addFloat(div)));				
-		}
-		//optimising remainder for floats
-		else if (handle.getInstruction() instanceof FREM)
-		{
-			// searching the values we have to get the remainder of
-			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
-			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Float floatObj = new Float(value2%value1);
-        	byte new_value = floatObj.byteValue();
-        	float rem = value2%value1;
-        	System.out.println("VALUE ADDED = " + rem);
-        
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addFloat(rem)));			
-		}
-		
-		/** ******************************************************************** **/
-		//optimising addition for doubles
-		else if (handle.getInstruction() instanceof DADD)
-		{
-			// searching the values we have to add
+			//Searching for the values
 			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
 			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Double doubleObj = new Double(value1+value2);
-        	byte new_value = doubleObj.byteValue();
-        	double sum = value1+value2;
-        	System.out.println("VALUE ADDED = " + sum);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addDouble(sum)));
+			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
+			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
+			double val = 0;
+			if (handle.getInstruction() instanceof DADD){
+				val = value1+value2;
+			}
+			if (handle.getInstruction() instanceof DSUB){
+				val = value2-value1;
+			}
+			if (handle.getInstruction() instanceof DMUL){
+				val = value2*value1;
+			}
+			if (handle.getInstruction() instanceof DDIV){
+				val = value2/value1;
+			}
+			if (handle.getInstruction() instanceof DREM){
+				val = value2%value1;
+			}
+			System.out.println("VALUE ADDED = " + val);
+		        	
+			handle = handle.getNext();
+		    try {
+		      	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
+		         // delete the old values
+		      	 instList.delete(handle.getPrev());
+		         instList.delete(handle.getPrev().getPrev());
+		         instList.delete(handle.getPrev().getPrev().getPrev());
+		    } catch (TargetLostException e) {
+		    	// TODO Auto-generated catch block
+		        e.printStackTrace();
+		    }
+		    instList.insert(handle, new LDC2_W(cgen.getConstantPool().addDouble(val)));
 		}
-		//optimising subtraction for doubles
-		else if (handle.getInstruction() instanceof DSUB)
-		{
-			// searching the values we have to subtract
-			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
-			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Double doubleObj = new Double(value2-value1);
-        	byte new_value = doubleObj.byteValue();
-        	double diff = value2-value1;
-        	System.out.println("VALUE ADDED = " + diff);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addDouble(diff)));						
-		}
-		//optimising multiplication for doubles
-		else if (handle.getInstruction() instanceof DMUL)
-		{
-			// searching the values we have to multiply
-			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
-			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Double doubleObj = new Double(value1*value2);
-        	byte new_value = doubleObj.byteValue();
-        	double mul = value1*value2;
-        	System.out.println("VALUE ADDED = " + mul);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addDouble(mul)));		        	
-		}
-		//optimising division for doubles
-		else if (handle.getInstruction() instanceof DDIV)
-		{// searching the values we have to divide
-			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
-			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Double doubleObj = new Double(value2/value1);
-        	byte new_value = doubleObj.byteValue();
-        	double div = value2/value1;
-        	System.out.println("VALUE ADDED = " + div);
-        
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addDouble(div)));				
-		}
-		//optimising remainder for doubles
-		else if (handle.getInstruction() instanceof DREM)
-		{
-			// searching the values we have to get the remainder of
-			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
-			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
-        	System.out.println("FOUND VALUE 1 = " + value1);
-        	System.out.println("FOUND VALUE 2 = " + value2);
-        	
-        	Double doubleObj = new Double(value2%value1);
-        	byte new_value = doubleObj.byteValue();
-        	double rem = value2%value1;
-        	System.out.println("VALUE ADDED = " + rem);
-        	
-        	handle= handle.getNext();
-        	try {
-           	    System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-                instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
-        	//adding the values - LDC pushes the value onto the stack 
-        	instList.insert(handle, new LDC(cgen.getConstantPool().addDouble(rem)));					
-		}
-	}
+	 }
 	
 	 private void optimizeMethod(ClassGen cgen, ConstantPoolGen cpgen, Method method) {
 	        // Get the Code of the method, which is a collection of bytecode instructions
