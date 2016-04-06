@@ -4,7 +4,7 @@ public class ConstantVariableFolding
 {
     public int methodOne(){
         int a = 62;
-        int b = (a + 764)*3; //826
+        int b = (a + 764)*3; //826*3=2478
         int c = a + 10; //72
         return b + 1234 - a; //2060-a = 1998
     }

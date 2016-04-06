@@ -120,6 +120,17 @@ public class ConstantFolder
         	double value = getLoadDoubleValue(handle, instList,cpgen,load_index);
         	return value;
 		}else
+		if (handle.getInstruction() instanceof I2D)
+		{
+			double value =  (double) getPrevInt (handle.getPrev(), instList, cpgen);
+			try {
+				instList.delete(handle.getPrev());
+			} catch (TargetLostException e) {
+				e.printStackTrace();
+			}
+			return value;
+			
+		}else
 			return 0;
 	}
 	
