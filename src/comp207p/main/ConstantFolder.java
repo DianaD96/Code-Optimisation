@@ -162,15 +162,25 @@ public class ConstantFolder
 		//iterate back
 		while (newHandle.getPrev()!=null)
 		{
+			System.out.println("!!!!!!!!!!!!!!! " + newHandle.getInstruction());
 			if (newHandle.getInstruction() instanceof ISTORE)
 			{
+				//System.out.println("HERE2");
+				//System.out.println("load_index =  " + load_index);
+				//System.out.println("istore index =  " + (int)((ISTORE)(newHandle.getInstruction())).getIndex());
+
 				if ((load_index == (int)((ISTORE)(newHandle.getInstruction())).getIndex())) 
 				{
-					return getPrevInt(newHandle.getPrev(), instList, cpgen);
+				//	System.out.println("HERE3");
+
+					int v = getPrevInt(newHandle.getPrev(), instList, cpgen);
+				//	System.out.println("INSIDEEEE = " + v);
+					return v;
 				}
 			}		
 			newHandle = newHandle.getPrev();
 		}
+		System.out.println("Couldn't return int!\n");
 		return 0;
 	}
 	
@@ -313,9 +323,21 @@ public class ConstantFolder
     		}
 		}
 	}
-	
+
 	/** ****************************************************************************************************************** **/
 	
+	
+	//delete handles
+	   private void delete_handles(InstructionList instList, InstructionHandle handle, InstructionHandle handle_to_delete_1, InstructionHandle handle_to_delete_2) {
+			try {
+				instList.delete(handle);
+				instList.delete(handle_to_delete_1);
+				instList.delete(handle_to_delete_2);
+			} catch (TargetLostException e) {
+				e.printStackTrace();
+			}
+	}
+
 	// optimise arithmetic operations
 	void optimizeArithmetic (InstructionHandle handle, InstructionList instList, ClassGen cgen, ConstantPoolGen cpgen)
 	{
@@ -323,6 +345,8 @@ public class ConstantFolder
 		if (handle.getInstruction() instanceof IADD || handle.getInstruction() instanceof ISUB || handle.getInstruction() instanceof IMUL ||handle.getInstruction() instanceof IDIV || handle.getInstruction() instanceof IREM)
 		{
 			//Searching for the values
+			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
+			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
 			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
@@ -345,21 +369,11 @@ public class ConstantFolder
 			}
 			System.out.println("VALUE ADDED = " + val);
         	
-			handle = handle.getNext();
-        	try {
-            	 System.out.println("DELETING HANDLES = " + handle.getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getInstruction() + "   " + handle.getPrev().getPrev().getPrev().getInstruction());
-                // delete the old values
-        		instList.delete(handle.getPrev());
-                instList.delete(handle.getPrev().getPrev());
-                instList.delete(handle.getPrev().getPrev().getPrev());
-            } catch (TargetLostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        	
         	//adding the values - LDC pushes the int value onto the stack 
         	/*!! better solution? !!*/
         	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(val)));
+        	delete_handles(instList, handle,handle_to_delete_1, handle_to_delete_2);
+        	
 		}
         
 		/** ******************************************************************** **/
