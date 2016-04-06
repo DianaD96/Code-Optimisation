@@ -8,7 +8,7 @@ public class DynamicVariableFolding {
         return b + 1234 - a; //3652-2351=1301
     }
 
-    public boolean methodTwo() {
+    public boolean methodTwo() { //works?
         int x = 12345;
         int y = 54321;
         System.out.println(x < y);
@@ -24,9 +24,9 @@ public class DynamicVariableFolding {
         return i * j; //84
     }
     
-    public int methodFour(){
+    public int methodFour(){ //works?
         int a = 534245;
-        int b = a - 1234;
+        int b = a - 1234; //533011
         System.out.println((120298345 - a) * 38.435792873);
         for(int i = 0; i < 10; i++){
             System.out.println((b - a) * i);

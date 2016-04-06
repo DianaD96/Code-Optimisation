@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
  * Test constant variable folding
  */
 
-/*/
+
 public class ConstantVariableFoldingTest {
 
     ConstantVariableFolding cvf = new ConstantVariableFolding();
@@ -36,4 +36,4 @@ public class ConstantVariableFoldingTest {
 
 }
 
-/*/
+

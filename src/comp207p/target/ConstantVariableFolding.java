@@ -15,13 +15,13 @@ public class ConstantVariableFolding
         return i + j;
     }
 
-    public boolean methodThree(){
+    public boolean methodThree(){ //works
         int x = 12345;
         int y = 54321;
         return x > y;
     }
 
-    public boolean methodFour(){
+    public boolean methodFour(){ //works
         long x = 4835783423L;
         long y = 400000;
         long z = x + y; // 4836183423

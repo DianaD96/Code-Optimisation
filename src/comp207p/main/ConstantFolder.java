@@ -304,7 +304,7 @@ public class ConstantFolder
 	// optimise comparisons
 	void optimizeComparisons (InstructionHandle handle, InstructionList instList, ClassGen cgen, ConstantPoolGen cpgen)
 	{
-		if (handle.getInstruction() instanceof IF_ACMPEQ || handle.getInstruction() instanceof IF_ACMPNE || handle.getInstruction() instanceof IF_ICMPEQ || handle.getInstruction() instanceof IF_ICMPEQ || handle.getInstruction() instanceof IF_ICMPGE || handle.getInstruction() instanceof IF_ICMPGT || handle.getInstruction() instanceof IF_ICMPLE || handle.getInstruction() instanceof IF_ICMPLT || handle.getInstruction() instanceof IF_ICMPNE)
+		if (handle.getInstruction() instanceof IF_ICMPLE)
 		{
 			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
 			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
@@ -324,7 +324,7 @@ public class ConstantFolder
 
 			delete_handles(instList,null,handle_to_delete_1, handle_to_delete_2);
 		}
-		
+			
 		if (handle.getInstruction() instanceof IFEQ || handle.getInstruction() instanceof IFGE || handle.getInstruction() instanceof IFGT || handle.getInstruction() instanceof IFLE || handle.getInstruction() instanceof IFLT || handle.getInstruction() instanceof IFNE)
 		{
 			InstructionHandle handle_to_delete_1 = handle.getPrev();
