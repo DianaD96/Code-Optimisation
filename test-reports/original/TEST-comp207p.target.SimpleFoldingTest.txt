@@ -1,9 +1,4 @@
 Testsuite: comp207p.target.SimpleFoldingTest
-Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.02 sec
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 sec
 
-Testcase: initializationError took 0.002 sec
-	Caused an ERROR
-No runnable methods
-java.lang.Exception: No runnable methods
-	at java.lang.reflect.Constructor.newInstance(Constructor.java:422)
-
+Testcase: testSimple took 0.004 sec
