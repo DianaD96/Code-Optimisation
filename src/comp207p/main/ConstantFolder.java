@@ -41,29 +41,20 @@ public class ConstantFolder
 	/** ****************************************************************************************************************** **/
 	private int getPrevInt(InstructionHandle handle, InstructionList instList, ConstantPoolGen cpgen)
 	{
-		//System.out.println("instruction = " + handle.getInstruction());
 		if (handle.getInstruction() instanceof ICONST)
 		{
-			//System.out.println("FROM ICONST = " + ((ICONST)(handle.getInstruction())).getValue());
-			//System.out.println();
 			return (int) ((ICONST)(handle.getInstruction())).getValue();
 		} else
 		if (handle.getInstruction() instanceof BIPUSH)
 		{
-			//System.out.println("FROM BIPUSH = " + ((BIPUSH)(handle.getInstruction())).getValue());
-			//System.out.println();
 			return (int) ((BIPUSH)(handle.getInstruction())).getValue();
 		}else
 		if (handle.getInstruction() instanceof SIPUSH)
 		{
-			//System.out.println("FROM SIPUSH = " + ((SIPUSH)(handle.getInstruction())).getValue());
-			//System.out.println();
 			return (int) ((SIPUSH)(handle.getInstruction())).getValue();
 		}else
 		if (handle.getInstruction() instanceof LDC)
 		{
-			//System.out.println("FROM LDC = " + ((LDC)(handle.getInstruction())).getValue(cpgen));
-			//System.out.println();
 			return (int) ((LDC)(handle.getInstruction())).getValue(cpgen);
 		}else
 		if (handle.getInstruction() instanceof ILOAD)
@@ -77,17 +68,12 @@ public class ConstantFolder
 	
 	private long getPrevLong(InstructionHandle handle, InstructionList instList, ConstantPoolGen cpgen)
 	{
-		//System.out.println("instruction = " + handle.getInstruction());
 		if (handle.getInstruction() instanceof LCONST)
 		{
-			//System.out.println("FROM LCONST = " + ((LCONST)(handle.getInstruction())).getValue());
-			//System.out.println();
 			return (long) ((LCONST)(handle.getInstruction())).getValue();
 		}else 
 		if (handle.getInstruction() instanceof LDC2_W)
 		{
-			//System.out.println("FROM LDC2_W = " + ((LDC2_W)(handle.getInstruction())).getValue(cpgen));
-			//System.out.println();
 			return (long) ((LDC2_W)(handle.getInstruction())).getValue(cpgen);
 		}else
 		if (handle.getInstruction() instanceof LLOAD)
@@ -101,17 +87,12 @@ public class ConstantFolder
 	
 	private double getPrevDouble(InstructionHandle handle, InstructionList instList, ConstantPoolGen cpgen)
 	{
-		//System.out.println("instruction = " + handle.getInstruction());
 		if (handle.getInstruction() instanceof DCONST)
 		{
-			//System.out.println("FROM DCONST = " + ((DCONST)(handle.getInstruction())).getValue());
-			//System.out.println();
 			return (double) ((DCONST)(handle.getInstruction())).getValue();
 		}else
 		if (handle.getInstruction() instanceof LDC2_W)
 		{
-			//System.out.println("FROM LDC2_W = " + ((LDC2_W)(handle.getInstruction())).getValue(cpgen));
-			//System.out.println();
 			return (double) ((LDC2_W)(handle.getInstruction())).getValue(cpgen);
 		}else 
 		if (handle.getInstruction() instanceof DLOAD)
@@ -136,16 +117,11 @@ public class ConstantFolder
 	
 	private float getPrevFloat(InstructionHandle handle, InstructionList instList, ConstantPoolGen cpgen)
 	{
-		//System.out.println("instruction = " + handle.getInstruction());
 		if (handle.getInstruction() instanceof FCONST)
 		{
-			//System.out.println("FROM FCONST = " + ((FCONST)(handle.getInstruction())).getValue());
-			//System.out.println();
 			return (float) ((FCONST)(handle.getInstruction())).getValue();
 		} else if (handle.getInstruction() instanceof LDC)
 		{
-			//System.out.println("FROM LDC = " + ((LDC)(handle.getInstruction())).getValue(cpgen));
-			//System.out.println();
 			return (float) ((LDC)(handle.getInstruction())).getValue(cpgen);
 		} else if (handle.getInstruction() instanceof FLOAD)
 		{
@@ -173,25 +149,16 @@ public class ConstantFolder
 		//iterate back
 		while (newHandle.getPrev()!=null)
 		{
-			//System.out.println("!!!!!!!!!!!!!!! " + newHandle.getInstruction());
 			if (newHandle.getInstruction() instanceof ISTORE)
 			{
-				//System.out.println("HERE2");
-				//System.out.println("load_index =  " + load_index);
-				//System.out.println("istore index =  " + (int)((ISTORE)(newHandle.getInstruction())).getIndex());
-
 				if ((load_index == (int)((ISTORE)(newHandle.getInstruction())).getIndex())) 
 				{
-				//	System.out.println("HERE3");
-
 					int v = getPrevInt(newHandle.getPrev(), instList, cpgen);
-				//	System.out.println("INSIDEEEE = " + v);
 					return v;
 				}
 			}		
 			newHandle = newHandle.getPrev();
 		}
-		System.out.println("Couldn't return int!\n");
 		return 0;
 	}
 	
@@ -272,7 +239,6 @@ public class ConstantFolder
 	   {
 		   if(handle!=null)
 		   {
-			   System.out.println("DELETING HANDLES = " + handle);
 			   try {
 					instList.delete(handle);
 				} catch (TargetLostException e) {
@@ -282,7 +248,6 @@ public class ConstantFolder
 		   
 		   if(handle_to_delete_1!=null)
 		   {
-			   System.out.println("DELETING HANDLES = " + handle_to_delete_1);
 			   try {
 					instList.delete(handle_to_delete_1);
 				} catch (TargetLostException e) {
@@ -292,7 +257,6 @@ public class ConstantFolder
 		   
 		   if(handle_to_delete_2!=null)
 		   {
-			   System.out.println("DELETING HANDLES = " + handle_to_delete_2);
 			   try {
 					instList.delete(handle_to_delete_2);
 				} catch (TargetLostException e) {
@@ -313,14 +277,8 @@ public class ConstantFolder
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
 			
-			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
-			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
-			
 			instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(value1)));
             instList.insert(handle_to_delete_2, new LDC(cgen.getConstantPool().addInteger(value2)));
-            
-			System.out.println("VALUE ADDED = " + value1);
-			System.out.println("VALUE ADDED = " + value2);
 
 			delete_handles(instList,null,handle_to_delete_1, handle_to_delete_2);
 		}
@@ -328,15 +286,9 @@ public class ConstantFolder
 		if (handle.getInstruction() instanceof IFEQ || handle.getInstruction() instanceof IFGE || handle.getInstruction() instanceof IFGT || handle.getInstruction() instanceof IFLE || handle.getInstruction() instanceof IFLT || handle.getInstruction() instanceof IFNE)
 		{
 			InstructionHandle handle_to_delete_1 = handle.getPrev();
-			
 			//Searching for the values
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
-			
-			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
-
 			instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(value1)));
-			System.out.println("VALUE ADDED = " + value1);
-
 			delete_handles(instList,null,handle_to_delete_1, null);
 			
 		}
@@ -350,21 +302,15 @@ public class ConstantFolder
 			
 			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
 			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
-			
-			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
-			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
-			
         	if (handle.getInstruction() instanceof FCMPL)
     		{
 				if (value1<value2)
 				{
 					instList.insert(handle, new LDC(1));
-					System.out.println("VALUE ADDED = 1 ");
 				}
 				else
 				{
 					instList.insert(handle, new LDC(0));
-					System.out.println("VALUE ADDED = 0 ");
 				}
     		}
         	if (handle.getInstruction() instanceof FCMPG)
@@ -372,12 +318,10 @@ public class ConstantFolder
         		if (value1>value2)
         		{
         			instList.insert(handle, new LDC(1));
-					System.out.println("VALUE ADDED = 1 ");
         		}
         		else
         		{
         			instList.insert(handle, new LDC(0));
-					System.out.println("VALUE ADDED = 0 ");
         		}
     		}
         	
@@ -393,21 +337,15 @@ public class ConstantFolder
 			
 			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
 			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
-			
-			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
-			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
-			
         	if (handle.getInstruction() instanceof DCMPL)
     		{
 				if (value1<value2)
 				{
 					instList.insert(handle, new LDC(1));
-					System.out.println("VALUE ADDED = 1 ");
 				}
 				else
 				{
 					instList.insert(handle, new LDC(0));
-					System.out.println("VALUE ADDED = 0 ");
 				}
     		}
         	if (handle.getInstruction() instanceof DCMPG)
@@ -415,12 +353,10 @@ public class ConstantFolder
         		if (value1>value2)
         		{
     				instList.insert(handle, new LDC(1));
-					System.out.println("VALUE ADDED = 1 ");
         		}
     			else
     			{
     				instList.insert(handle, new LDC(0));
-					System.out.println("VALUE ADDED = 0 ");
     			}
     		}
         	delete_handles(instList, handle, handle_to_delete_1, handle_to_delete_2);
@@ -440,8 +376,6 @@ public class ConstantFolder
 			//Searching for the values
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
-			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
-			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
 			int val = 0;
 			if (handle.getInstruction() instanceof IADD){
 				val = value1+value2;
@@ -458,8 +392,6 @@ public class ConstantFolder
 			if (handle.getInstruction() instanceof IREM){
 				val = value2%value1;
 			}
-			System.out.println("VALUE ADDED = " + val);
-        	
         	//adding the values - LDC pushes the int value onto the stack 
         	/*!! better solution? !!*/
         	instList.insert(handle, new LDC(cgen.getConstantPool().addInteger(val)));
@@ -476,8 +408,6 @@ public class ConstantFolder
 			//Searching for the values
 			long value1 = getPrevLong(handle.getPrev(), instList, cpgen);
 			long value2 = getPrevLong(handle.getPrev().getPrev(), instList, cpgen);
-			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
-			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
 			long val = 0;
 			if (handle.getInstruction() instanceof LADD){
 				val = value1+value2;
@@ -493,9 +423,7 @@ public class ConstantFolder
 			}
 			if (handle.getInstruction() instanceof LREM){
 				val = value2%value1;
-			}
-			System.out.println("VALUE ADDED = " + val);
-		        		
+			}  		
 		    instList.insert(handle, new LDC2_W(cgen.getConstantPool().addLong(val)));
         	delete_handles(instList, handle,handle_to_delete_1, handle_to_delete_2);
 
@@ -510,8 +438,6 @@ public class ConstantFolder
 			//Searching for the values
 			float value1 = getPrevFloat(handle.getPrev(), instList, cpgen);
 			float value2 = getPrevFloat(handle.getPrev().getPrev(), instList, cpgen);
-			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
-			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
 			float val = 0;
 			if (handle.getInstruction() instanceof FADD){
 				val = value1+value2;
@@ -527,9 +453,7 @@ public class ConstantFolder
 			}
 			if (handle.getInstruction() instanceof FREM){
 				val = value2%value1;
-			}
-			System.out.println("VALUE ADDED = " + val);
-		        	
+			}	
 		    instList.insert(handle, new LDC(cgen.getConstantPool().addFloat(val)));
         	delete_handles(instList, handle,handle_to_delete_1, handle_to_delete_2);
 
@@ -544,8 +468,6 @@ public class ConstantFolder
 			//Searching for the values
 			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
 			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
-			System.out.println("FOUND VALUE 1 = " + handle.getPrev().getInstruction() + "    " + value1);
-			System.out.println("FOUND VALUE 2 = " + handle.getPrev().getPrev().getInstruction() + "    " + value2);
 			double val = 0;
 			if (handle.getInstruction() instanceof DADD){
 				val = value1+value2;
@@ -561,9 +483,7 @@ public class ConstantFolder
 			}
 			if (handle.getInstruction() instanceof DREM){
 				val = value2%value1;
-			}
-			System.out.println("VALUE ADDED = " + val);
-		        	
+			}  	
 		    instList.insert(handle, new LDC2_W(cgen.getConstantPool().addDouble(val)));
         	delete_handles(instList, handle,handle_to_delete_1, handle_to_delete_2);
 
@@ -574,57 +494,57 @@ public class ConstantFolder
 	        // Get the Code of the method, which is a collection of bytecode instructions
 	        Code methodCode = method.getCode();
 
-			//System.out.println("cpgen= " + cpgen);
-
 	        // Now get the actualy bytecode data in byte array,
 	        // and use it to initialise an InstructionList
 	        InstructionList instList = new InstructionList(methodCode.getCode());
-
-			//System.out.println("instList= " + instList);
 
 	        // Initialise a method generator with the original method as the baseline
 	        //MethodGen methodGen = new MethodGen(method.getAccessFlags(), method.getReturnType(), method.getArgumentTypes(),
 	        //        null, method.getName(), cgen.getClassName(), instList, cpgen);
 	        MethodGen methodGen = new MethodGen(method, cgen.getClassName(), cpgen);
-
+	        
+	        Method newMethod = methodGen.getMethod();
+	        System.out.println("Old!! = " +instList);
+	        
 	        // InstructionHandle is a wrapper for actual Instructions
 	        for (InstructionHandle handle : instList.getInstructionHandles()) {
-				System.out.println("instHandle= " + handle.getInstruction());
+				// System.out.println("instHandle= " + handle.getInstruction());
 	        	optimizeArithmetic(handle, instList, cgen, cpgen);	            
 	        	optimizeComparisons(handle, instList, cgen, cpgen);
+	        	// System.out.println("instHandle= " + handle.getInstruction());
 			        // set max stack/local
 			        methodGen.setMaxStack();
 			        methodGen.setMaxLocals();
-		
+			        
+			        methodGen.setInstructionList(instList);
+			        
 			        // remove local variable table
 			        methodGen.removeLocalVariables();
 		
 			        //methodGen.removeCodeAttributes();
 		
 			        // generate the new method with replaced instList
-			        Method newMethod = methodGen.getMethod();
+			        newMethod = methodGen.getMethod();
 			        // replace the method in the original class
 			        cgen.replaceMethod(method, newMethod);
 		    }
+	        System.out.println("New!! = " +instList);
 	}
+	 
 	 
 	public void optimize()
 	{
 		ClassGen cgen = new ClassGen(original);
 		ConstantPoolGen cpgen = cgen.getConstantPool();
 
-		//System.out.println("cgen= " + cgen);
-		//System.out.println("cpgen= " + cpgen);
-
 		// Implement your optimization here
 		 Method[] methods = cgen.getMethods();
 	        for (Method m : methods) {
-	           // System.out.println("Method: " + m.getName());
 	            optimizeMethod(cgen, cpgen, m);
 	            System.out.println("Method End!\n");
 	        }
 	        gen = cgen;
-
+	    gen.setMajor(50);
 		this.optimized = gen.getJavaClass();
 	}
 
