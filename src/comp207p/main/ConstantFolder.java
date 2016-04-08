@@ -412,7 +412,9 @@ public class ConstantFolder
     		{
 				System.out.println("VAL 1" + value1); //154321
 				System.out.println("VAL 2" + value2); //212345
-				if (value1 > value2 || value1 == value2){
+				System.out.println(value1 < value2); //212345
+
+				if (value1 < value2 || value1 == value2){ // CHANGED THIS
 					System.out.println("GET OUT");
 					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(1)));
 				}
