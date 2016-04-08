@@ -13,6 +13,7 @@ import java.io.PrintStream;
  * test simple folding
  */
 
+/*/
 public class SimpleFoldingTest {
 
 	
@@ -40,3 +41,4 @@ public class SimpleFoldingTest {
   
 }
 
+/*/
