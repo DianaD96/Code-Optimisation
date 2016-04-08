@@ -391,17 +391,40 @@ public class ConstantFolder
 	{
 		if (handle.getInstruction() instanceof IF_ICMPLE)
 		{
+//			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
+//			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
+//			
+//			//Searching for the values
+//			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
+//			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
+//			
+//			instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(value1)));
+//            instList.insert(handle_to_delete_2, new LDC(cgen.getConstantPool().addInteger(value2)));
+//
+//			delete_handles(instList,null,handle_to_delete_1, handle_to_delete_2);
+			
 			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
 			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
-			
 			//Searching for the values
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
 			int value2 = getPrevInt(handle.getPrev().getPrev(), instList, cpgen);
+			if (handle.getInstruction() instanceof IF_ICMPLE)
+    		{
+				System.out.println("VAL 1" + value1); //154321
+				System.out.println("VAL 2" + value2); //212345
+				if (value1 > value2 || value1 == value2){
+					System.out.println("GET OUT");
+					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(1)));
+				}
+				else{
+					System.out.println("I'M HERE BUDDY");
+					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(0)));
+				}
+    		}
 			
-			instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(value1)));
-            instList.insert(handle_to_delete_2, new LDC(cgen.getConstantPool().addInteger(value2)));
-
-			delete_handles(instList,null,handle_to_delete_1, handle_to_delete_2);
+			delete_handles(instList,handle,handle_to_delete_1, handle_to_delete_2);
+			
+			
 		}
 			
 		if (handle.getInstruction() instanceof IFEQ || handle.getInstruction() instanceof IFGE || handle.getInstruction() instanceof IFGT || handle.getInstruction() instanceof IFLE || handle.getInstruction() instanceof IFLT || handle.getInstruction() instanceof IFNE)
@@ -417,9 +440,26 @@ public class ConstantFolder
 				else{
 					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(0)));
 				}
-				//todo Rest of Integer Comparisons
     		}
-			//instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(value1)));
+			if (handle.getInstruction() instanceof IFGE)
+    		{
+				if (value1 > 0 || value1 == 0){
+					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(1)));
+				}
+				else{
+					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(0)));
+				}
+    		}
+			if (handle.getInstruction() instanceof IFNE)
+    		{
+				if (value1 == 0){
+					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(1)));
+				}
+				else{
+					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(0)));
+				}
+    		}
+			
 			delete_handles(instList,null,handle_to_delete_1, null);
 			
 		}
