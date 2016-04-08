@@ -110,6 +110,7 @@ public class ConstantFolder
 				e.printStackTrace();
 			}
 			return value;
+			
 		}else
 			return 0;
 	}
@@ -232,6 +233,7 @@ public class ConstantFolder
 	/** ****************************************************************************************************************** **/
 	
 	
+	
 	//delete handles
 	   private void delete_handles(InstructionList instList, InstructionHandle handle, InstructionHandle handle_to_delete_1, InstructionHandle handle_to_delete_2) 
 	   {
@@ -286,17 +288,7 @@ public class ConstantFolder
 			InstructionHandle handle_to_delete_1 = handle.getPrev();
 			//Searching for the values
 			int value1 = getPrevInt(handle.getPrev(), instList, cpgen);
-			if (handle.getInstruction() instanceof IFLE)
-    		{
-				if (value1 < 0 || value1 == 0){
-					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(1)));
-				}
-				else{
-					instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(0)));
-				}
-				//todo Rest of Integer Comparisons
-    		}
-			//instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(value1)));
+			instList.insert(handle_to_delete_1, new LDC(cgen.getConstantPool().addInteger(value1)));
 			delete_handles(instList,null,handle_to_delete_1, null);
 			
 		}
@@ -471,14 +463,11 @@ public class ConstantFolder
 		//optimising arithmetic for doubles
 		if (handle.getInstruction() instanceof DADD || handle.getInstruction() instanceof DSUB || handle.getInstruction() instanceof DMUL ||handle.getInstruction() instanceof DDIV || handle.getInstruction() instanceof DREM)
 		{
-			InstructionHandle now = handle;
 			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
 			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
 			//Searching for the values
 			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
 			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
-			System.out.println("VALUE 1 " + value1);
-			System.out.println("VALUE 2 " + value2);
 			double val = 0;
 			if (handle.getInstruction() instanceof DADD){
 				val = value1+value2;
@@ -495,10 +484,8 @@ public class ConstantFolder
 			if (handle.getInstruction() instanceof DREM){
 				val = value2%value1;
 			}  	
-			System.out.println("TOTAL " + val);
 		    instList.insert(handle, new LDC2_W(cgen.getConstantPool().addDouble(val)));
-		    
-		    delete_handles(instList, now,handle_to_delete_1, handle_to_delete_2);
+        	delete_handles(instList, handle,handle_to_delete_1, handle_to_delete_2);
 
 		}
 	 }
