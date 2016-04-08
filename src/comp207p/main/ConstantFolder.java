@@ -105,6 +105,7 @@ public class ConstantFolder
 		{
 			double value =  (double) getPrevInt (handle.getPrev(), instList, cpgen);
 			try {
+				System.out.println("DELETING THIS IN getPrevDouble (I2D): " + handle.getPrev());
 				instList.delete(handle.getPrev());
 			} catch (TargetLostException e) {
 				e.printStackTrace();
@@ -230,6 +231,7 @@ public class ConstantFolder
 		return 0;
 	}
 	/** ****************************************************************************************************************** **/
+	
 	
 	
 	//delete handles
@@ -474,6 +476,9 @@ public class ConstantFolder
 			InstructionHandle now = handle;
 			InstructionHandle handle_to_delete_1 = handle.getPrev(); 
 			InstructionHandle handle_to_delete_2 = handle.getPrev().getPrev();
+			System.out.println("WANT TO DELETE: " + now);
+			System.out.println("WANT TO DELETE: " + handle_to_delete_1);
+			System.out.println("WANT TO DELETE: " + handle_to_delete_2);
 			//Searching for the values
 			double value1 = getPrevDouble(handle.getPrev(), instList, cpgen);
 			double value2 = getPrevDouble(handle.getPrev().getPrev(), instList, cpgen);
@@ -497,7 +502,9 @@ public class ConstantFolder
 			}  	
 			System.out.println("TOTAL " + val);
 		    instList.insert(handle, new LDC2_W(cgen.getConstantPool().addDouble(val)));
-		    
+		    System.out.println("ACTUALLY DELETING: " + now);
+			System.out.println("ACTUALLY DELETING: " + handle_to_delete_1);
+			System.out.println("ACTUALLY DELETING: " + handle_to_delete_2);
 		    delete_handles(instList, now,handle_to_delete_1, handle_to_delete_2);
 
 		}
